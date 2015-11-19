@@ -65,13 +65,13 @@ function drawChart() {
     // Create the data table, add the columns
     chartData = new google.visualization.DataTable();
     chartData.addColumn('string', 'Time or Date', 'timedate' );
-    chartData.addColumn('number', 'Main  Room',   'mainroom' );
-    chartData.addColumn('number', 'Heat Temp',    'heatemp'  );
-    chartData.addColumn('number', 'Front Room',   'frontroom');
-    chartData.addColumn('number', 'Heat on?',     'heating'  );
-    chartData.addColumn('number', 'Power kW',     'power'    );
-    chartData.addColumn('number', 'Outdoor Temp', 'outdoor'  );
-    chartData.addColumn('number', 'Baby Room',    'babyroom' );
+    chartData.addColumn('string', 'Main  Room',   'mainroom' );
+    chartData.addColumn('string', 'Heat Temp',    'heatemp'  );
+    chartData.addColumn('string', 'Front Room',   'frontroom');
+    chartData.addColumn('string', 'Heat on?',     'heating'  );
+    chartData.addColumn('string', 'Power kW',     'power'    );
+    chartData.addColumn('string', 'Outdoor Temp', 'outdoor'  );
+    chartData.addColumn('string', 'Baby Room',    'babyroom' );
     chartData.addColumn('string', 'Timestamp',    'updated_at');
 
     // Set chart options as an array
@@ -95,7 +95,8 @@ function drawChart() {
     var unit = 'hour';
     if (1*hours===0) {
         unit = 'day';
-        howmuch = days; }
+        howmuch = days; 
+    }
     
     // request the data from the server-side DB
     // initially, we just want data from the last hour
@@ -172,7 +173,7 @@ function drawChart() {
     pwrChart = new google.visualization.AreaChart( document.getElementById('drawPwrChart') );
     pwrChartData = new google.visualization.DataTable();
     pwrChartData.addColumn('string', 'Time or Date', 'timedate');
-    pwrChartData.addColumn('number', 'Power (W)', 'power');
+    pwrChartData.addColumn('string', 'Power (W)', 'power');
 
     // request the data from the server-side DB
     // initially, we just want data from the last pre-defined time
