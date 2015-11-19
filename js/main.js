@@ -9,6 +9,7 @@
  * - use fixed colors for the graph
  */
 
+var baseURL = "/";
 
 // get weekday name of date object: weekdayName[dateObj.getDay()] 
 weekdayName = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -87,7 +88,7 @@ function drawChart() {
     // request the data from the server-side DB
     // initially, we just want data from the last hour
     $.getJSON(
-        'templog',{
+        baseURL+'templog',{
             howmuch : howmuch,
             unit    : unit
         }, 
@@ -164,7 +165,7 @@ function drawChart() {
     // request the data from the server-side DB
     // initially, we just want data from the last pre-defined time
     $.getJSON(
-        'powerlog',{
+        baseURL+'powerlog',{
             howmuch : howmuch,
             unit    : unit
         }, 
@@ -225,7 +226,7 @@ function getLatestData() {
     var colIndex = chartData.getNumberOfColumns();
     lastVal = chartData.getValue(rowIndex-1, colIndex-1);
     // now get the last data record
-    $.getJSON('templog/latest', 
+    $.getJSON(baseURL+'templog/latest', 
         function(data,status){
             if (status==='success') {
                 data = data["data"];
@@ -261,7 +262,7 @@ function getLatestPwrData() {
     //lastTime = pwrChartData.getValue(rowIndex-1, 0);
     
     // now get the last data record
-    $.getJSON('powerlog/latest', 
+    $.getJSON(baseURL+'powerlog/latest', 
         function(data,status){
             if (status==='success') {
                 data = data["data"];
@@ -423,7 +424,7 @@ function getLogbook() {
     window.setTimeout('getLogbook()',100000);
     
     // first, get last building event
-    $.getJSON('buildinglog/latest', function(data,status) {
+    $.getJSON(baseURL+'buildinglog/latest', function(data,status) {
         if (status==='success') {
             data = data["data"];
             var span = '<span class="titleBarData">';
@@ -439,7 +440,7 @@ function getLogbook() {
     // do nothing as long as the events haven't been loaded
     if (!events) {return;}
     
-    $.getJSON('eventlog/latest', function(data,status) {
+    $.getJSON(baseURL+'eventlog/latest', function(data,status) {
         if (status==='success') {
             data = data["data"];
             // turn timestamp into a Date object
@@ -506,7 +507,7 @@ function showLogbookReport(log,event,evtDt){
  */
 function getEvents(where) {
     // populate the events table
-    $.getJSON('events', function( data, status ) {
+    $.getJSON(baseURL+'events', function( data, status ) {
         if (status==='success') {
             data = data["data"];
             events = data;
@@ -975,7 +976,7 @@ $(window).on("orientationchange",function(){
  */
 function getHeatingControl() {
     
-    $.getJSON("settings",function(data,status){
+    $.getJSON(baseURL+"settings",function(data,status){
         if (status==='success') {
             heatingControl=data["data"];
             
