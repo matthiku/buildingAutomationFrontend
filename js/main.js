@@ -11,11 +11,23 @@
 
 var baseURL = "/buildingAPI/public/";
 
+var oauth = {
+    cmd: 'oauth/access_token',
+    tokenRequest: {
+        'grant_type'    : 'client_credentials',
+        'client_id'     : 'reader',
+        'client_secret' : "vz0Rf7",
+    },
+    accToken: '',
+    expire: 0,
+};
+
+
 // get weekday name of date object: weekdayName[dateObj.getDay()] 
 weekdayName = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     
 // default time range values for data to be shown on the graph
-var hours = 1, days = 0;  
+var hours = 2, days = 0;  
 
 // stop refreshing when config popup is active
 var refreshing = true;
@@ -225,7 +237,7 @@ function getLatestData() {
     var rowIndex = chartData.getNumberOfRows();
     var colIndex = chartData.getNumberOfColumns();
     lastVal = chartData.getValue(rowIndex-1, colIndex-1);
-    // now get the last data record
+    // get the last data record
     $.getJSON(baseURL+'templog/latest', 
         function(data,status){
             if (status==='success') {
@@ -261,7 +273,7 @@ function getLatestPwrData() {
     //var rowIndex = pwrChartData.getNumberOfRows();
     //lastTime = pwrChartData.getValue(rowIndex-1, 0);
     
-    // now get the last data record
+    // get the last data record
     $.getJSON(baseURL+'powerlog/latest', 
         function(data,status){
             if (status==='success') {
@@ -501,79 +513,78 @@ function showLogbookReport(log,event,evtDt){
  * Get the heating program events from the backend DB and
  * - populate the events table
  * - make the table editable if all status are 'OK'
+ *
  * @param {string} where Set to 'Mobile' in order to access the correct DOM element on mobile devices
  * 
  * @returns {undefined}
  */
 function getEvents(where) {
     // populate the events table
-    $.getJSON(baseURL+'events', function( data, status ) {
-        if (status==='success') {
-            data = data["data"];
-            events = data;
-            var dbOK = true;
-            var r = new Array(), j = -1;
-            for (var key=0, size=data.length; key<size; key++){
-                r[++j] = '<tr data-index="'+data[key]['id']+'">';
-                r[++j] = '<td class="edit" id="title">';
-                r[++j] = data[key]['title'];
-                r[++j] = '</td><td>';
-                r[++j] = data[key]['id'];
-                r[++j] = '</td><td class="editWeekday" id="weekday">';
-                r[++j] = data[key]['weekday'];
-                r[++j] = '</td><td class="edit" id="start">';
-                r[++j] = data[key]['start'];
-                r[++j] = '</td><td class="edit" id="end">';
-                r[++j] = data[key]['end'];
-                r[++j] = '</td><td class="edit" id="targetTemp">';
-                r[++j] = data[key]['targetTemp'];
-                r[++j] = '</td><td class="editRepeats" id="repeats">';
-                r[++j] = data[key]['repeats'];
-                r[++j] = '</td><td class="edit" id="nextdate">';
-                r[++j] = data[key]['nextdate'];
-                r[++j] = '</td><td class="edit" id="rooms">';
-                r[++j] = data[key]['rooms'];
-                r[++j] = '</td><td>';
-                r[++j] = data[key]['status'];
-                r[++j] = '</td><td>';
-                r[++j] = data[key]['updated_at'];
-                r[++j] = '</td></tr>';
-                if (data[key]['status']!=='OK'){
-                    dbOK = false;
+    $.getJSON( baseURL+'events', 
+        function( data, status ) {
+            if (status==='success') {
+                data = data["data"];
+                events = data;
+                var dbOK = true;
+                var r = new Array(), j = -1;
+                for (var key=0, size=data.length; key<size; key++) {
+                    r[++j] = '<tr data-index="'+data[key]['id']+'">';
+                    r[++j] = '<td class="edit" id="title">';
+                    r[++j] = data[key]['title'];
+                    r[++j] = '</td><td>';
+                    r[++j] = data[key]['id'];
+                    r[++j] = '</td><td class="editWeekday" id="weekday">';
+                    r[++j] = data[key]['weekday'];
+                    r[++j] = '</td><td class="edit" id="start">';
+                    r[++j] = data[key]['start'];
+                    r[++j] = '</td><td class="edit" id="end">';
+                    r[++j] = data[key]['end'];
+                    r[++j] = '</td><td class="edit" id="targetTemp">';
+                    r[++j] = data[key]['targetTemp'];
+                    r[++j] = '</td><td class="editRepeats" id="repeats">';
+                    r[++j] = data[key]['repeats'];
+                    r[++j] = '</td><td class="edit" id="nextdate">';
+                    r[++j] = data[key]['nextdate'];
+                    r[++j] = '</td><td class="edit" id="rooms">';
+                    r[++j] = data[key]['rooms'];
+                    r[++j] = '</td><td>';
+                    r[++j] = data[key]['status'];
+                    r[++j] = '</td><td>';
+                    r[++j] = data[key]['updated_at'];
+                    r[++j] = '</td></tr>';
+                    if ( data[key]['status'] !== 'OK' ) {  dbOK = false;   }
                 }
-            }
-            
-            // write the table body with the new data
-            
-            if (where !== 'mobile') {
-                $('#tblEventsBody').html(r.join('')); 
-                $('#tblEvents').table('rebuild');
                 
-                // make cells editable if DB status is OK
-                if (dbOK) { 
-                    tableEditable(); }
-                else {
-                    $('#tblEventsBody').click(function(){
-                        $('#popupMsg').popup('open');
-                        $('#popupMsgText').text('Events table is locked, because last change has not been processed yet.');
-                    }); 
+                // write the table body with the new data                
+                if (where !== 'mobile') {
+                    $('#tblEventsBody').html(r.join('')); 
+                    $('#tblEvents').table('rebuild');
+                    
+                    // make cells editable if DB status is OK
+                    if (dbOK) { 
+                        tableEditable(); }
+                    else {
+                        $('#tblEventsBody').click(function(){
+                            $('#popupMsg').popup('open');
+                            $('#popupMsgText').text('Events table is locked, because last change has not been processed yet.');
+                        }); 
+                    }
+                    var d = new Date();
+                    $('#lblEventsTblLoaded').html('Last read of events table: ' + d.toLocaleTimeString() );
                 }
-                var d = new Date();
-                $('#lblEventsTblLoaded').html('Last read of events table: ' + d.toLocaleTimeString() );
+                // on mobiles (or small displays) attach the data to a different DIV
+                else {
+                    $('#tblEventsBodyMobile').html(r.join('')); 
+                }
+                
+                // refresh events table every so often ....
+                // more often when we're waiting for a change to be accepted
+                if (dbOK) { 
+                    window.setTimeout('getEvents()',1000000); }
+                else {
+                    window.setTimeout('getEvents()',100000);
+                }
             }
-            // on mobiles (or small displays) attach the data to a different DIV
-            else {
-                $('#tblEventsBodyMobile').html(r.join('')); 
-            }
-            
-            // refresh events table every so often ....
-            // more often when we're waiting for a change to be accepted
-            if (dbOK) { 
-                window.setTimeout('getEvents()',1000000); }
-            else {
-                window.setTimeout('getEvents()',100000);
-            }
-        }
     });
 }
 
@@ -854,8 +865,8 @@ $(document).ready(function(){
     $('#btnSelData').show();
     // populate the chart title and the input sliders
     $('#showDataRange').show();
-    $('#days').val(days).slider("refresh");
-    $('#hours').val(hours).slider("refresh");
+    //$('#days').val(days).slider("refresh");
+    //$('#hours').val(hours).slider("refresh");
 
     // stop refreshing while selection dialog is visible
     $("#selectData").on('popupafteropen', function(){
@@ -968,6 +979,22 @@ $(window).on("orientationchange",function(){
 });
 
 
+// check if the token has expired
+function checkToken() {
+    var now = new Date();
+    if (oauth.expire - now < 1) { // request a new token
+        $.ajax({
+            type: 'POST',
+            url: baseURL+oauth.url,
+            dataType: 'json',
+            async: false,
+            success: function(data) {
+                oauth.accToken = data.access_token;
+                oauth.expire = data.expires_in;
+            }
+        });
+    }
+}
 
 /**
  * get Heating Control Settings data via AJAX and fill form
@@ -975,32 +1002,38 @@ $(window).on("orientationchange",function(){
  * @returns {undefined}+
  */
 function getHeatingControl() {
-    
-    $.getJSON(baseURL+"settings",function(data,status){
-        if (status==='success') {
-            heatingControl=data["data"];
-            
-            // fill settings form
-            switch (heatingControl.heating) {
-                case 'AUTO':
-                    $("input[name='inpHeatingMode'][value='AUTO']").prop("checked",true);
-                    break;
-                case 'ON':
-                    $("input[name='inpHeatingMode'][value='ON']").prop("checked",true);
-                    break;
-                case 'OFF':
-                    $("input[name='inpHeatingMode'][value='OFF']").prop("checked",true);
-                    break;
-                default:
-            }
-            
-            $('#autoOnBelow').val(heatingControl.autoOnBelow);
-            $('#autoOffAbove').val(heatingControl.autoOffAbove);
-            $('#increasePerHour').val(heatingControl.increasePerHour);
-     
-            location.href = '#pupSettings';    
 
+    // first make sure we have a valid oauth token
+    checkToken();
+    
+    // send a request together with the token
+    $.getJSON(baseURL+"settings?access_token="+oauth.accToken,
+        function(data,status){
+            if (status==='success') {
+                heatingControl=data["data"];
+                
+                // fill settings form
+                switch (heatingControl.heating) {
+                    case 'AUTO':
+                        $("input[name='inpHeatingMode'][value='AUTO']").prop("checked",true);
+                        break;
+                    case 'ON':
+                        $("input[name='inpHeatingMode'][value='ON']").prop("checked",true);
+                        break;
+                    case 'OFF':
+                        $("input[name='inpHeatingMode'][value='OFF']").prop("checked",true);
+                        break;
+                    default:
+                }
+                
+                $('#autoOnBelow').val(heatingControl.autoOnBelow);
+                $('#autoOffAbove').val(heatingControl.autoOffAbove);
+                $('#increasePerHour').val(heatingControl.increasePerHour);
+         
+                location.href = '#pupSettings';    
+
+            }
         }
-    });
+    );
    
 }
