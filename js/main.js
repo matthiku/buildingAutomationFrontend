@@ -9,7 +9,7 @@
  * - use fixed colors for the graph
  */
 
-var baseURL = "/";
+var baseURL = "/buildingAPI/public/";
 
 // get weekday name of date object: weekdayName[dateObj.getDay()] 
 weekdayName = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
