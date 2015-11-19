@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<!--
+
+shows data from TempLog in a Google graph
+enables user to select which columns to display and the date range 
+
+(C) 2014, 2015 Matthias Kuhs
+Ennis, Ireland
+-->
+
+<html>
+    <head>
+        <meta charset="UTF-8">
+        
+        <link rel="stylesheet" href="css/jquery.ui.min.css">
+        
+        <link rel="stylesheet" href="css/style.css">        
+        
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        
+        <!--Load the Google AJAX API-->
+        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+
+        <!--load jQuery and jQuery UI-->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+        <!--load jQuery Mobile -->
+        <!--link rel="stylesheet" href="jquery.mobile.min.css" /-->
+        <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.js"></script>
+        
+        <!--enables cell-editing-->
+        <script src="js/jquery.jeditable.js"></script>
+
+        <!--load own javascript-->
+        <script src="js/main.js"></script>            
+        
+        <title>Building Management and Control</title>
+    </head>
+    <body>
+        
+        
+        <!--main page-->
+        <div data-role="page" id="pageone"  style="background-color: gray;">
+            
+            
+            <!--header-->
+            <div data-role="header">
+                <a href="/index.php" data-ajax="false" class="ui-btn ui-icon-home ui-btn-icon-left">Home</a>
+                <h1>EEC Building Management - Heating Control</h1>
+                <a href="#popupMenu" data-rel="popup" data-role="button" 
+                   data-inline="true" data-transition="pop" 
+                   data-icon="gear" data-theme="e">&nbsp;</a>
+                <div data-role="popup" id="popupMenu" data-theme="b">
+                    <ul data-role="listview" data-inset="true" style="min-width:210px;" data-theme="b">
+                        <li data-role="list-divider" data-theme="e">Choose an action</li>
+                        <li><a href="#" onclick="getHeatingControl()"    
+                               title="Configure settings for heating management"
+                               >Heating Control Settings</a></li>
+                        <li><a href="#pageTwo" title="TAN needed in order to change events!"
+                               >Request TAN</a></li>
+                        <li><a href="#" onclick="$('#tblContainer').toggle()">Show/Hide Events</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            
+            
+            
+            <!--main content-->
+            <div id="mainCont" data-role="main" class="ui-content" style="overflow: visible">
+                
+                <!-- 'liveData'    show all latest values in seperate boxes-->
+                <div id="liveData" class="ui-corner-all">
+                    <span class="titleBarLbl ui-corner-all ui-state-active" title="is the heating on or off?">
+                        <img style="vertical-align:text-top" height="19" width="19" src="images/heating.gif" alt=""
+                             /><span class="titleBarData" id="showHeatingStatus" >?</span>(
+                                <span class="titleBarData" id="showHeatwater" >?</span>&deg;C)</span>
+                    <span class="titleBarLbl ui-corner-all ui-state-active" title="main room temperature">
+                        <img style="vertical-align:text-top" height="19" width="19" src="images/thermometer.png" alt=""
+                             />Main<span class="titleBarData" id="showMainRoom" >?</span>&deg;C</span>
+                    <span class="titleBarLbl ui-corner-all ui-state-active" title="front room temperature">
+                        <img style="vertical-align:text-top" height="19" width="19" src="images/thermometer.png" alt=""
+                             />Front<span class="titleBarData" id="showFrontRoom">?</span>&deg;C</span>
+                    <span class="titleBarLbl ui-corner-all ui-state-active" title="current power consumption">
+                        <img style="vertical-align:text-top" height="19" width="19" src="images/electricity.png" alt=""
+                             /><span class="titleBarData" id="showLatestPower">?</span
+                                >W&nbsp;<span id="latestPowerTime"></span>
+                    </span> &nbsp;
+                    <span class="titleBarLbl ui-corner-all ui-state-active" 
+                          title="Last reading was how long ago?" id="lblLastReading"></span>
+                </div>
+                
+                
+                <!-- show Logbook data -->
+                <div class="ui-corner-all" style="float: none; display: block; height: 70px">
+                    <div class="otherData bold floatLeft ui-state-default ui-corner-all desktopOnly"
+                         style="padding: 0 3px; text-align: center;">
+                        Recent<br/>activities:
+                    </div>
+                    <div class="otherData floatLeft ui-state-default ui-corner-all desktopOnly"
+                         style="margin-left: 3px; padding: 0;">
+                        <div style="border-bottom: 1px solid black; padding-left: 3px">Heating:
+                            <span class="ui-corner-all" id="showLogbook">
+                                <span class="titleBarData">one moment ...</span>
+                            </span>
+                        </div>
+                        <div style="padding-left: 3px;">Lighting:
+                            <span class="ui-corner-all" id="showBuildingLog">
+                                <span class="titleBarData">one moment ...</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <!--show button and settings for data range values-->
+                <div id="showDataRange" class="ui-state-active ui-corner-all"
+                     style="display: none; text-align: center; margin-bottom: 4px;">
+                    <div class="ui-field-contain" 
+                         style="margin: 0; padding: 4px; background-color: burlywood;">
+                        
+                        <fieldset data-role="controlgroup" data-type="horizontal" 
+                                  data-mini="true" data-theme="b">
+                            
+                            <legend class="desktopOnly bold ">Select what to show:</legend>                            
+
+                            <!-- preselect certain -->
+                            <input type="radio" name="chbxWhat" id="chbxAll" 
+                                   title="show all data (click 'Go!' to execute this!"
+                                   class="custom">
+                            <label for="chbxAll">All values</label>
+                            <input type="radio" name="chbxWhat" id="chbxRoomTemp" 
+                                   title="show only room and aux temperatures (click 'Go!' to execute this!"
+                                   class="custom" checked="checked">
+                            <label for="chbxRoomTemp">Room Temps only</label>
+                            <!--input type="radio" name="chbxWhat" id="chbxOnlyPower" 
+                                   title="show only power data (click 'Go!' to execute this!"
+                                   class="custom">
+                            <label for="chbxOnlyPower">Power</label -->
+                            <a onclick="showTempsOnly()"
+                               class="ui-btn ui-btn-inline ui-icon-check ui-btn-icon-left ui-corner-all"
+                               title="Show all values, only room temps or only power"
+                               >Go!</a>
+                            <a onclick="plus1h()" style="margin-left: 15px"
+                               class="ui-btn ui-btn-inline ui-icon-clock ui-btn-icon-left ui-corner-all"
+                               title="show 1 hour more of data"
+                               >+ 1h</a>
+                            <a onclick="minus1h()" id="minus1h"
+                               class="ui-btn ui-btn-inline ui-icon-clock ui-btn-icon-left ui-corner-all"
+                               title="show 1 hour less of data"
+                               >- 1h</a>
+                            <a onclick="show24h()"  style="margin-left: 5px"
+                               class="ui-btn ui-btn-inline ui-icon-clock ui-btn-icon-left ui-corner-all"
+                               title="show data from the last 24 hours"
+                               >24h</a>
+                            <a onclick="show7days()"
+                               class="ui-btn ui-btn-inline ui-icon-clock ui-btn-icon-left ui-corner-all"
+                               title="show data from the last 7 days"
+                               >7d</a>
+                    
+                            <!-- open selector panel-->
+                            <a id="btnSelData" href="#selectData"  data-rel="popup" 
+                               data-transition="fade" data-position-to="default"
+                               class="ui-btn ui-btn-inline ui-icon-bullets ui-btn-icon-left ui-corner-all"
+                               style="display: none; margin-left: 15px" title="Select date range and values"
+                               >Detailed Config.</a>
+                            
+                        </fieldset>
+                    </div>
+                </div>
+                
+                <!--google viz graph area-->
+                <div class="ui-corner-tl ui-corner-tr" id="drawChart"></div>
+                
+                <!--google viz graph area for power only -->
+                <div class="ui-corner-bottom" id="drawPwrChart"></div>
+
+                
+                <!--show loading image during AJAX loading-->
+                <div id="loading"  data-role="nopopup" style="display: none">
+                    <img src="images/ajax-loader.gif" alt="loading ...." />
+                    one moment, please ...
+                </div>
+                
+                
+                <!--table to show currently programmed heating events (only on desktop devices) -->
+                <div id="tblContainer" class="ui-corner-all desktopOnly"
+                     style="background-color: papayawhip; padding: 2px; margin-top: .5em">
+                    <big style="display: inline-block; padding-left: 7px; padding-right: 7px;"
+                         class="ui-widget-header ui-corner-all">
+                        Programmed Events for Heating Management:
+                    </big>
+                    <table data-role="table" data-mode="columntoggle" 
+                           class="ui-responsive ui-shadow table-stripe" 
+                           id="tblEvents">
+                        <thead><tr>
+                          <th data-priority="1">Event Name</th>
+                          <th data-priority="6">ID</th>
+                          <th>Weekday</th>
+                          <th data-priority="2">Start</th>
+                          <th data-priority="5">End</th>
+                          <th data-priority="6">Temp</th>
+                          <th data-priority="3">Repeat?</th>
+                          <th data-priority="4">Next Date</th>
+                          <th data-priority="6">Rooms</th>
+                          <th data-priority="5">Status</th>
+                          <th data-priority="6">Last update</th>
+                        </tr></thead>
+                        <tbody id="tblEventsBody">
+                            <!--to be filled via AJAX-->
+                        </tbody>
+                    </table>
+                    <small id="lblEventsTblLoaded" style="text-align: right; display: block;">last updated?</small>
+                </div>
+                
+                
+                <!-- 'popupMsg'    generic popop message dialog    -->
+                <div data-role="popup" id="popupMsg" class="ui-content" data-transition="fade">
+                    <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn ui-icon-delete ui-btn-icon-notext ui-btn-left">Close</a>
+                    <div data-role="main" class="ui-content">
+                        <p id="popupMsgText">Some text..</p>
+                    </div>
+                </div>
+
+
+                <!-- data selection dialog -->
+                <div data-role="popup" id="selectData" data-theme="b" 
+                     class="ui-content" data-transition="fade">
+
+                    <fieldset id="fldColSelect" data-role="controlgroup" data-theme="a" data-mini="true">
+                    <legend>Choose at least one column to show:</legend>
+                        <label for="chbAll">(Select all)</label>
+                        <input type="checkbox" checked="" name="selectCols" id="chbAll" value="0" onclick="selectAllCols(this)">
+                        <label for="chbMainroom">Main Room temp.</label>
+                        <input type="checkbox" checked="" name="selectCols" id="chbMainroom" value="1">
+                        <label for="chbHeatemp">Heating Water temp.</label>
+                        <input type="checkbox" name="selectCols" id="chbHeatemp" value="2">
+                        <label for="chbFrontroom">Front Room temp.</label>
+                        <input type="checkbox" checked="" name="selectCols" id="chbFrontroom" value="3">
+                        <label for="chbHeating">Heating on or off</label>
+                        <input type="checkbox" name="selectCols" id="chbHeating" value="4">
+                        <label for="chbOther">Outdoor temp.</label>
+                        <input type="checkbox" name="selectCols" id="chbOther" value="5">
+                        <label for="chbOutdoor">Outdoor temp.</label>
+                        <input type="checkbox" name="selectCols" id="chbOutdoor" value="6">
+                        <label for="chbBabyRoom">Babyroom temp.</label>
+                        <input type="checkbox" checked="" name="selectCols" id="chbBabyRoom" value="7">
+                    </fieldset>
+
+                    <h4>Select the data range:</h4>
+
+                    <label for="hours">Hours:</label>
+                    <input type="range" data-theme="a"
+                           data-hightlight="true" data-popup-enabled="true"
+                           name="hours" id="hours" value="1" min="0" max="99">
+
+                    <label for="days">Or days:</label>
+                    <input type="range" data-theme="a"
+                       data-hightlight="true" data-popup-enabled="true"
+                       name="days" id="days" value="0" min="0" max="31">
+
+                    <a href="#" onclick="selectColumns()" class="ui-btn" data-theme="a">OK</a>
+
+                </div>
+
+
+                
+            </div>
+            
+            
+        </div>
+
+        
+                        
+        <!-- Settings dialog for Heating Control -->
+        <div data-role="page" id="pupSettings">
+            <a href="#" data-rel="back" 
+               class="ui-btn ui-corner-all ui-shadow ui-btn ui-icon-delete ui-btn-icon-notext ui-btn-right"
+               >Close</a>
+            <div data-role="header"><h1>Manage Heating Parameters</h1></div>
+
+            <div data-role="main" class="ui-content" style="max-width: 600px">
+                
+                <div>
+                    <label for="controlTAN">TAN for Heating Control</label>
+                    <input type="number" id="controlTAN" value="0">
+                </div>
+                
+                <fieldset data-role="controlgroup">
+                    <legend>Switch heating ... (ON/OFF/AUTO):</legend>
+                    <label for="auto">Automatically</label>
+                    <input type="radio" name="inpHeatingMode" id="auto" value="AUTO">
+                    <label for="off">Always Off</label>
+                    <input type="radio" name="inpHeatingMode" id="off" value="OFF" >
+                    <label for="on">Always On</label>
+                    <input type="radio" name="inpHeatingMode" id="on" value="ON">
+                </fieldset>
+
+                <div id="divAdvSettings" style="display: none;">
+                    <label for="autoOnBelow">Auto-On below (&deg;C)</label>
+                    <input type="number" id="autoOnBelow" value="0">
+                    <label for="autoOffAbove">Auto-Off above (&deg;C)</label>
+                    <input type="number" id="autoOffAbove" value="0">
+                    <label for="increasePerHour">Est. increase per hour when heating is on (&deg;C)</label>
+                    <input type="number" id="increasePerHour" value="0">
+                </div>
+
+                <input type="button" data-inline="true" value="Submit" 
+                       data-icon="check"  data-mini="true" 
+                       onclick="submitSettings()">
+                <input type="button" data-inline="true" value="Cancel"
+                       data-icon="delete"  data-mini="true"
+                       onclick="location.href='#'">
+                <input type="button" data-inline="true" value="Advanced" 
+                       data-icon="bullets"  data-mini="true"
+                       onclick="$('#divAdvSettings').toggle()">
+
+            </div>
+            <div data-role="footer" data-position="fixed" style="text-align:center;">
+                <span id="updHeatSetResult"></span>
+            </div>
+        </div>
+
+
+
+        
+        
+        <!--request TAN dialog-->
+        <div data-role="page"  data-dialog="true" id="pageTwo">
+            
+            <div data-role="main" class="ui-content">
+                <h2>Request TAN:</h2>
+                <p>In order to program the events for the heating control, 
+                you need to send a TAN code along with your change.
+                <br>If you don't have the latest TAN, you can request a re-submit 
+                and the system will send the TAN to the 
+                previously provided email addresses.</p>
+                <a href="#" onclick="requestTAN('events')" class="ui-btn ui-btn-inline">Send Request</a>
+                <p id="reqTANresult"></p>
+                <input type="button" data-inline="true" value="Cancel"
+                       data-icon="delete"  data-mini="true"
+                       onclick="location.href='#'">
+            </div>
+            
+        </div>
+
+        
+        
+        
+        
+        <!--handle heating events on a page for mobile devices only-->
+        <div data-role="page" id="pagefour">
+
+            
+            <!--header-->
+            <div data-role="header">
+                <a href="#pageone" class="ui-btn ui-icon-home ui-btn-icon-left">Back</a>
+                <h1>EEC Building Management - Heating Control</h1>
+            </div>
+            
+            
+            <div data-role="main" class="ui-content">
+                <h2>Events</h2>
+                <div id="mobileEvents">
+                    <table data-role="table" data-mode="columntoggle" class="ui-responsive ui-shadow" id="tblEventsMobile">
+                        <thead><tr>
+                          <th data-priority="1">Event Name</th>
+                          <th data-priority="6">ID</th>
+                          <th>Weekday</th>
+                          <th data-priority="2">Start</th>
+                          <th data-priority="6">End</th>
+                          <th data-priority="6">Temp</th>
+                          <th data-priority="3">Repeat?</th>
+                          <th data-priority="4">Next Date</th>
+                          <th data-priority="6">Rooms</th>
+                          <th data-priority="5">Status</th>
+                        </tr></thead>
+                        <tbody id="tblEventsBodyMobile">
+                            <!--to be filled via AJAX-->
+                        </tbody>
+                    </table>
+                </div>
+                
+            </div>
+            
+            <div id="pg4Footer" data-role="footer" data-position="fixed" style="text-align:center;">
+                <a class="ui-btn ui-icon-bullets ui-btn-icon-left" href="#pagetwo" data-transition="pop"
+                   title="TAN needed in order to change events!"
+                   >Request TAN</a>
+            </div>
+            
+        </div>
+
+        
+        
+
+        
+    </body>
+</html>

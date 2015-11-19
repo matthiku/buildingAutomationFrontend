@@ -1,0 +1,95 @@
+/*
+(C) 2014 Matthias Kuhs
+Ennis, Ireland
+*/
+/* 
+    Created on : 27-May-2014, 14:13:31
+    Author     : Matthias Kuhs
+*/
+
+
+.ui-content {
+    padding-top: .5em !IMPORTANT;
+    padding-bottom: .5em !IMPORTANT;
+}
+
+.desktopOnly {
+    display: inherit;
+}
+
+@media all and (max-width: 500px) {
+    // hide certain elements on small displays
+    .desktopOnly {
+        display: none;
+    }
+}
+
+#ajaxLoading
+{
+    border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    width: 32px;
+    height: 32px;
+    text-align: center;
+    line-height: 32px;
+    background-color: rgba(0,0,0,0.4);
+    color: white;
+    position: absolute;
+    left: 50%;
+    top: 20%;
+    margin-left: -50px;
+    margin-top: -50px;
+}
+
+/* Add alternating row stripes */
+.table-stripe tbody tr:nth-child(odd) td,
+.table-stripe tbody tr:nth-child(odd) th {
+  background-color: rgba(0,0,0,0.04);
+}
+/* Add stroke to the header and last item */
+.table-stripe thead th,
+.table-stripe tbody tr:last-child {
+  border-bottom: 1px solid rgba(0, 0, 0, .1);
+}
+
+#drawPwrChart {
+    margin-top: 3px;
+}
+
+#drawChart {
+    background-color: #F0F0FF;
+    padding: 0 3px 0 3px;
+}
+
+#liveData, .otherData {
+    margin-bottom: 3px;
+    line-height:  180%;
+    padding:     1px;
+}
+
+.titleBarLbl {
+    padding: 3px;
+    margin-right:  1px;
+    border: solid black 1px;
+}
+
+.titleBarData {
+    font-weight: bold;
+    padding-left: 2px;
+    padding-right: 2px;
+    margin-left: 2px;
+    margin-right: 2px;
+    background-color: aquamarine;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+}
+
+.bold {
+    font-weight: bolder;
+}
+
+.floatLeft {
+    float: left;
+}
