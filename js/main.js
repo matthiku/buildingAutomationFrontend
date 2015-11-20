@@ -9,6 +9,9 @@
  * - use fixed colors for the graph
  */
 
+// for WAMP
+var baseURL = "/dev/buildingAPI/public/";
+// for production 
 var baseURL = "/buildingAPI/public/";
 
 var oauth = {
@@ -304,6 +307,8 @@ function getLatestPwrData() {
  */
 function fillTitleBar(data) {
     
+    if (data===undefined) { return; }
+
     // show how old the latest data is (last column is the timestamp)
     var dd = mySQLdate( data['updated_at'] ); 
     var now = new Date();
@@ -399,8 +404,8 @@ function refreshGraph() {
     // update the slider in the config popup
     $('#hours').val(hours);
     $('#days').val(days);
-    $('#hours').val(hours).slider("refresh");
-    $('#days').val(days).slider("refresh");
+    //$('#hours').val(hours).slider("refresh");
+    //$('#days').val(days).slider("refresh");
 
 };
 
@@ -421,13 +426,13 @@ function wrtPwrDataToTitle(time, power, boiler, heating) {
     }
     
     // 'translate' heating status (0 or 1) into words
-    if (heating===0) {
-        $('#showHeatingStatus').html( 'OFF' );  
-        $('#showHeatingStatus').css({'background-color':'inherit','color':'blue'}); 
-    } 
-    else {
+    if (heating) {
         $('#showHeatingStatus').html( ' ON ' ); 
         $('#showHeatingStatus').css({'background-color':'crimson','color':'black'}); 
+    } 
+    else {
+        $('#showHeatingStatus').html( 'OFF' );  
+        $('#showHeatingStatus').css({'background-color':'inherit','color':'blue'}); 
     }
 }
 
@@ -923,16 +928,15 @@ $(document).on("pagecreate", function () {
             $("#hours")
                 .off("change")
                 .val(0)
-                .slider("refresh")
                 .on("change", resetSlider);
-        }
+        };
         if (current == hours) {
             $("#days")
                 .off("change")
                 .val(0)
-                .slider("refresh")
                 .on("change", resetSlider);
-        }
+        };
+        // removed: .slider("refresh")
     }
     // activate change event on the sliders to call above function
     $("#days, #hours").on("change", resetSlider);
