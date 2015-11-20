@@ -9,10 +9,14 @@
  * - use fixed colors for the graph
  */
 
-// for WAMP
-var baseURL = "/dev/buildingAPI/public/";
-// for production 
-var baseURL = "/buildingAPI/public/";
+if (document.URL.search('localhost')>0){
+    // on WAMP
+    var baseURL = "/dev/buildingAPI/public/";   
+}
+else {
+    // in production 
+    var baseURL = "/buildingAPI/public/";
+}
 
 var oauth = {
     cmd: 'oauth/access_token',
@@ -127,7 +131,7 @@ function drawChart() {
 
                 // turn the JSON into an array of value arrays
                 tempData =[];
-                for (var i = data.length - 1; i >= 0; i--) {
+                for (var i = 0; i < data.length; i++) {
                     tempData.push( [
                             data[i]['updated_at'].substr(11,5), 
                             data[i]['mainroom'], 
@@ -191,7 +195,7 @@ function drawChart() {
                 if (data.length<1) { return; }
                 // prepare the data
                 pwrData =[];
-                for (var i = data.length - 1; i >= 0; i--) {
+                for (var i = 0; i < data.length; i++) {
                     pwrData.push( [data[i]['updated_at'].substr(11,8), data[i]['power'] ] );
                 };
                 // add the whole data to the DataTable object
@@ -245,10 +249,12 @@ function getLatestData() {
     $.getJSON(baseURL+'templog/latest', 
         function(data,status){
             if (status==='success') {
+                // was response empty?
+                if (data.data===undefined||data.data===null){ return;}
                 data = data["data"];
                 fillTitleBar(data[0]);
                 // is this new data or still the same?
-                if (data[0][data[0].length-1]!==lastVal) {
+                if (data.updated_at !== lastVal) {
                     // add the new data to the DataTable object
                     chartData.addRows(data);
                     // re-draw the chart
@@ -444,6 +450,8 @@ function getLogbook() {
     // first, get last building event
     $.getJSON(baseURL+'buildinglog/latest', function(data,status) {
         if (status==='success') {
+            // was response empty?
+            if (data.data===undefined||data.data===null){ return;}
             data = data["data"];
             var span = '<span class="titleBarData">';
             var evtDate = mySQLdate(data.updated_at).toUTCString().slice(0,-7);
@@ -460,6 +468,8 @@ function getLogbook() {
     
     $.getJSON(baseURL+'eventlog/latest', function(data,status) {
         if (status==='success') {
+            // was response empty?
+            if (data.data===undefined||data.data===null){ return;}
             data = data["data"];
             // turn timestamp into a Date object
             var eventDate = mySQLdate(data.updated_at);
@@ -489,25 +499,25 @@ function showLogbookReport(log,event,evtDt){
     var midnight = new Date(); 
     midnight.setHours(0,0,0);
     if (evtDt < midnight) {
-        text = span + event.title + '</span> (ID:'+log.eventID+'), finished at ' + span
+        text = span + event.title + '</span> (ID:'+log.event_id+'), finished at ' + span
                 + event.end.substr(0,5) + '</span> and heating was switched off at '+span + log.actualOff.substr(0,5);
     }
     else // today's event, mark it in the event table
     {
-        $("[data-index="+log.eventID+"]").css({
+        $("[data-index="+log.event_id+"]").css({
             "background-color":"khaki",
                  "font-weight":"bold"
         });
         if (log.estimateOn !== "00:00:00") {
-            text = span +  event.title + '</span> (ID:'+log.eventID+') starts at ' + span + event.start 
+            text = span +  event.title + '</span> (ID:'+log.event_id+') starts at ' + span + event.start 
                     + '</span>, heating will be switched on around ' + log.estimateOn;
         }
         if (log.actualOn !== "00:00:00") {
-            text = span +  event.title + '</span> (ID:'+log.eventID+') started at ' + span + event.start 
+            text = span +  event.title + '</span> (ID:'+log.event_id+') started at ' + span + event.start 
                     + '</span>, heating was switched on at ' + log.actualOn;
         }
         if (log.actualOff !== "00:00:00") {
-            text = span +  event.title + '</span> (ID:'+log.eventID+') ended at ' + span + event.end 
+            text = span +  event.title + '</span> (ID:'+log.event_id+') ended at ' + span + event.end 
                     + '</span>, heating was switched OFF at ' + log.actualOff;
         }
     }
