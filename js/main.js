@@ -263,7 +263,7 @@ function getLatestData() {
                         data.outdoor, 
                         data.babyroom, 
                         data.updated_at, 
-                    ] );
+                    ];
 
                 // is this new data or still the same?
                 if (data.updated_at !== lastVal) {
