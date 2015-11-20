@@ -1,7 +1,7 @@
 /* 
  * main JS for new index.php
  * 
- * (C) 2014 Matthias Kuhs
+ * (C) 2014,2015 Matthias Kuhs
  * Ennis, Ireland
  * 
  * 
@@ -252,11 +252,23 @@ function getLatestData() {
                 // was response empty?
                 if (data.data===undefined||data.data===null){ return;}
                 data = data["data"];
-                fillTitleBar(data[0]);
+                fillTitleBar(data);
+                tempData = [
+                        data.updated_at.substr(11,5), 
+                        data.mainroom, 
+                        data.auxtemp, 
+                        data.frontroom, 
+                        data.heating_on, 
+                        data.power, 
+                        data.outdoor, 
+                        data.babyroom, 
+                        data.updated_at, 
+                    ] );
+
                 // is this new data or still the same?
                 if (data.updated_at !== lastVal) {
                     // add the new data to the DataTable object
-                    chartData.addRows(data);
+                    chartData.addRows(tempData);
                     // re-draw the chart
                     chart.draw(myView, options);
                 }
@@ -513,7 +525,7 @@ function showLogbookReport(log,event,evtDt){
                     + '</span>, heating will be switched on around ' + log.estimateOn;
         }
         if (log.actualOn !== "00:00:00") {
-            text = span +  event.title + '</span> (ID:'+log.event_id+') started at ' + span + event.start 
+            text = span +  event.title + '</span> (ID:'+log.event_id+') starts at ' + span + event.start 
                     + '</span>, heating was switched on at ' + log.actualOn;
         }
         if (log.actualOff !== "00:00:00") {
