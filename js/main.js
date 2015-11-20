@@ -268,7 +268,7 @@ function getLatestData() {
                 // is this new data or still the same?
                 if (data.updated_at !== lastVal) {
                     // add the new data to the DataTable object
-                    chartData.addRows(tempData);
+                    chartData.addRow(tempData);
                     // re-draw the chart
                     chart.draw(myView, options);
                 }
