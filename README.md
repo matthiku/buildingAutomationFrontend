@@ -12,6 +12,7 @@ Using -
 * Google Visualization Tools
  
 **A sample screenshot**
+
 ![sample](https://github.com/matthiku/buildingAutomationFrontend/blob/master/SmallScreenshot.png)
 
 ## Background
