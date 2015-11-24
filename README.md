@@ -12,7 +12,7 @@ Using -
 * Google Visualization Tools
  
 **A sample screenshot**
-![sample](https://github.com/matthiku/buildingAutomationFrontend/blob/master/Sample%20Screenshot.png)
+![sample](https://github.com/matthiku/buildingAutomationFrontend/blob/master/SmallScreenshot.png)
 
 ## Background
 This module is the front-end part of a 3-tiered project called "Building Automation, Control and Monitoring":
