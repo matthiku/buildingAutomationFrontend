@@ -4,12 +4,12 @@
 
 Using -
 * html, css, javascript
-* jQuery
-* jQueryUI
-* jQueryMobile
-* jQueryJeditable
-* Google AJAX api
-* Google Visualization Tools
+* [jQuery](http://jquery.com/)
+* [jQueryUI](http://jqueryui.com/)
+* [jQueryMobile](http://jquerymobile.com/)
+* [jQueryJeditable](https://github.com/tuupola/jquery_jeditable)
+* [Google AJAX api](https://developers.google.com/loader/?hl=en)
+* [Google Visualization Tools](https://developers.google.com/chart/)
  
 **A sample screenshot**
 
