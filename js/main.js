@@ -516,10 +516,12 @@ function showLogbookReport(log,event,evtDt){
     }
     else // today's event, mark it in the event table
     {
-        $("[data-index="+log.event_id+"]").css({
-            "background-color":"khaki",
-                 "font-weight":"bold"
-        });
+        if (log.estimateOn !== "00:00:00" || log.actualOn !== "00:00:00") {
+            $("[data-index="+log.event_id+"]").css({
+                "background-color":"khaki",
+                     "font-weight":"bold"
+            });
+        }
         if (log.estimateOn !== "00:00:00") {
             text = span +  event.title + '</span> (ID:'+log.event_id+') starts at ' + span + event.start 
                     + '</span>, heating will be switched on around ' + log.estimateOn;
@@ -531,6 +533,10 @@ function showLogbookReport(log,event,evtDt){
         if (log.actualOff !== "00:00:00") {
             text = span +  event.title + '</span> (ID:'+log.event_id+') ended at ' + span + event.end 
                     + '</span>, heating was switched OFF at ' + log.actualOff;
+            $("[data-index="+log.event_id+"]").css({
+                "background-color":"initial",
+                     "font-weight":"initial"
+            });
         }
     }
     
