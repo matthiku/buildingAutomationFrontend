@@ -562,7 +562,7 @@ function getEvents(where) {
                 var dbOK = true;
                 var r = new Array(), j = -1;
                 for (var key=0, size=data.length; key<size; key++) {
-                    r[++j] = '<tr data-index="'+data[key]['id']+'">';
+                    r[++j] = '<tr data-index="'+data[key]['id']+'" style="">';
                     r[++j] = '<td class="edit" id="title">';
                     r[++j] = data[key]['title'];
                     r[++j] = '</td><td>';
@@ -604,7 +604,7 @@ function getEvents(where) {
                         }); 
                     }
                     var d = new Date();
-                    $('#lblEventsTblLoaded').html('Last read of events table: ' + d.toLocaleTimeString() );
+                    $('#lblEventsTblLoaded').html('Last updated at ' + d.toLocaleTimeString() );
                 }
                 // on mobiles (or small displays) attach the data to a different DIV
                 else {
